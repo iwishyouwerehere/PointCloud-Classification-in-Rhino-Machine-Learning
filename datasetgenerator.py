@@ -26,7 +26,7 @@ def get_point_cloud(object_id, num_points):
         # Check if the point is inside the BREP
         if rs.IsPointInSurface(object_id, point):
             point_cloud.append(point)
-            rs.AddPoint(point)  # Visualize the points in the Rhino viewport
+            #rs.AddPoint(point)  # Visualize the points in the Rhino viewport
 
     return point_cloud
 

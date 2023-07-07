@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 from sklearn.tree import export_graphviz
 # Feature engineering functions
 from sklearn import tree
+from scipy.spatial import ConvexHull
+from scipy.stats import skew, kurtosis
+from sklearn.decomposition import PCA
 
 def centroid(points):
     return np.mean(points, axis=0)
@@ -47,9 +50,34 @@ def extract_features(sample):
     avg_point_dist = average_point_distance(points)
     eigenvalues_ = eigenvalues(points)
     thickness_range_ = thickness_range(points)
+    hull_volume = convex_hull_volume(points)
+    pca_features_ = pca_features(points)
+    density = point_density(points)
+    skewness_ = skewness(points)
+    kurtosis__ = kurtosis_(points)
 
-    features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_])
+    features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_, hull_volume, pca_features_, density, skewness_, kurtosis__])
     return features
+
+
+def convex_hull_volume(points):
+    hull = ConvexHull(points)
+    return hull.volume
+
+def pca_features(points):
+    pca = PCA(n_components=3)
+    pca.fit(points)
+    return pca.explained_variance_ratio_
+
+def point_density(points):
+    volume = bounding_box_volume(points)
+    return len(points) / volume
+
+def skewness(points):
+    return skew(points)
+
+def kurtosis_(points):
+    return kurtosis(points)
 
 # Load dataset
 
@@ -75,21 +103,7 @@ y_pred = clf.predict(X_test)
 # Visualize a single decision tree from the Random Forest
 single_tree = clf.estimators_[0]  # You can change the index to see different trees
 
-plt.figure(figsize=(30, 15))
-tree.plot_tree(single_tree,
-               feature_names=['centroid_x', 'centroid_y', 'centroid_z',
-                              'min_x', 'min_y', 'min_z',
-                              'max_x', 'max_y', 'max_z',
-                              'range_x', 'range_y', 'range_z',
-                              'bbox_volume', 'avg_point_dist',
-                              'eigenvalue_1', 'eigenvalue_2', 'eigenvalue_3',
-                              'thickness_range'],
-               class_names=list(np.unique(y).astype(str)),
-               filled=True,
-               impurity=False,
-               proportion=True,
-               fontsize=9)
-plt.show()
+
 
 print(classification_report(y_test, y_pred))
 print('Accuracy:', accuracy_score(y_test, y_pred))
