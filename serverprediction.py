@@ -11,10 +11,6 @@ import joblib
 import matplotlib.pyplot as plt
 from sklearn.tree import export_graphviz
 from sklearn import tree
-from scipy.spatial import ConvexHull
-from scipy.stats import skew, kurtosis
-from sklearn.decomposition import PCA
-
 # Feature engineering functions
 def centroid(points):
     return np.mean(points, axis=0)
@@ -43,25 +39,6 @@ def thickness_range(points):
     thickness_range_ = max_values[2] - min_values[2]
     return thickness_range_
 
-def convex_hull_volume(points):
-    hull = ConvexHull(points)
-    return hull.volume
-
-def pca_features(points):
-    pca = PCA(n_components=3)
-    pca.fit(points)
-    return pca.explained_variance_ratio_
-
-def point_density(points):
-    volume = bounding_box_volume(points)
-    return len(points) / volume
-
-def skewness(points):
-    return skew(points)
-
-def kurtosis_(points):
-    return kurtosis(points)
-
 def extract_features(sample):
     points = np.array(sample['points'])
     centroid_ = centroid(points)
@@ -70,14 +47,10 @@ def extract_features(sample):
     avg_point_dist = average_point_distance(points)
     eigenvalues_ = eigenvalues(points)
     thickness_range_ = thickness_range(points)
-    hull_volume = convex_hull_volume(points)
-    pca_features_ = pca_features(points)
-    density = point_density(points)
-    skewness_ = skewness(points)
-    kurtosis__ = kurtosis_(points)
 
-    features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_, hull_volume, pca_features_, density, skewness_, kurtosis__])
+    features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_])
     return features
+
 
 app = Flask(__name__)
 
@@ -100,6 +73,9 @@ def predict():
 
     # Return the prediction as a JSON response
     return jsonify({'prediction': str(custom_pred[0])})
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6666, debug=True)
