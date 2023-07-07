@@ -74,5 +74,7 @@ def predict():
     # Return the prediction as a JSON response
     return jsonify({'prediction': int(custom_pred[0])})
 
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6666)
