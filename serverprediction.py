@@ -72,7 +72,8 @@ def predict():
     print('Predicted category:', custom_pred[0])
 
     # Return the prediction as a JSON response
-    return jsonify({'prediction': int(custom_pred[0])})
+    return jsonify({'prediction': str(custom_pred[0])})
+
 
 
 
