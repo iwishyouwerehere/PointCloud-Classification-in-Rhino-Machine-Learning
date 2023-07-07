@@ -57,7 +57,7 @@ def extract_features(sample):
 clf = joblib.load('type.joblib')
 
 # Load the new sample
-with open('datasettest.json', 'r') as f:
+with open('target.json', 'r') as f:
     custom_data = json.load(f)
 
 custom_points = custom_data[0]['points']

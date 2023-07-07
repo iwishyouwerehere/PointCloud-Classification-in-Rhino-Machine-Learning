@@ -80,8 +80,10 @@ def main():
     
     with open(output_file_path, 'w') as f:
         json.dump(output_data, f, indent=4)
-        print str(open(os.path.join(os.path.dirname(os.path.realpath(__file__)))))
+        print(os.path.dirname(os.path.realpath(__file__)))
+
         print "printed"
+        print output_data
 
 if __name__ == "__main__":
     main()
