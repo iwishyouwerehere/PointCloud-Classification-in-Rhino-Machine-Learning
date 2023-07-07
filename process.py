@@ -51,8 +51,6 @@ def extract_features(sample):
     features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_])
     return features
 
-
-
 # Load dataset
 
 with open('dataset.json', 'r') as f:
