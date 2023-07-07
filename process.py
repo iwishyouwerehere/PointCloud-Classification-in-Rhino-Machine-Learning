@@ -59,7 +59,6 @@ def extract_features(sample):
     features = np.hstack([centroid_, min_values, max_values, range_values, bbox_volume, avg_point_dist, eigenvalues_, thickness_range_, hull_volume, pca_features_, density, skewness_, kurtosis__])
     return features
 
-
 def convex_hull_volume(points):
     hull = ConvexHull(points)
     return hull.volume
@@ -80,7 +79,6 @@ def kurtosis_(points):
     return kurtosis(points)
 
 # Load dataset
-
 with open('dataset.json', 'r') as f:
     data = json.load(f)
 
@@ -99,11 +97,6 @@ clf = RandomForestClassifier(n_estimators=200, random_state=42*4, class_weight='
 clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
-# Visualize a single decision tree from the Random Forest
-# Visualize a single decision tree from the Random Forest
-single_tree = clf.estimators_[0]  # You can change the index to see different trees
-
-
 
 print(classification_report(y_test, y_pred))
 print('Accuracy:', accuracy_score(y_test, y_pred))
