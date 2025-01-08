@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-import datetime  # Import datetime module
+import datetime
+import json
 
 app = Flask(__name__)
 
@@ -10,47 +11,58 @@ def predict():
     try:
         # Get client IP address
         client_ip = request.remote_addr
-        
+
         # Get current date and time
         now = datetime.datetime.now()
         date_str = now.strftime("%Y-%m-%d")
         time_str = now.strftime("%H:%M:%S")
-        
-        # Write to text file
+
+        # Log connection details (always keep this)
         with open('connection_logs.txt', 'a') as file:
             file.write(f"IP: {client_ip}, Date: {date_str}, Time: {time_str}\n")
-        
-        # Print received data for debugging
-        print("Received request data:", request.get_json())
-        
-        # Get both dataset and question from the request
+
+        # Get data and validate
         data = request.get_json()
         if not data or 'dataset' not in data or 'question' not in data:
             return jsonify({'error': 'Missing required data'}), 400
-            
-        dataset = data['dataset']
-        question = data['question']
-        
-        # Prepare training data
-        X = []  # points
-        y = []  # labels
-        
-        for item in dataset:
-            X.append(np.array(item['points']).flatten())
-            y.append(item['label'])
-        
+
+        # Truncate request data for logging
+        truncated_dataset = [{
+            'points': item['points'][:2] + ['...'] if len(item['points']) > 2 else item['points'],
+            'label': item['label']
+        } for item in data['dataset'][:3]] + ['...'] if len(data['dataset']) > 3 else data['dataset'][:3]
+
+        truncated_question = {
+            'points': data['question']['points'][:2] + ['...'] if len(data['question']['points']) > 2 else data['question']['points']
+        }
+
+        # Log truncated request (for debugging)
+        print(f"Received request - Dataset (truncated): {json.dumps(truncated_dataset)}, Question (truncated): {json.dumps(truncated_question)}")
+
+        # Prepare training data (using the full data, not the truncated one)
+        X = [np.array(item['points']).flatten() for item in data['dataset']]
+        y = [item['label'] for item in data['dataset']]
+
         # Train model
         model = KNeighborsClassifier(n_neighbors=3)
         model.fit(X, y)
-        
+
         # Make prediction
-        question_points = np.array(question['points']).flatten()
+        question_points = np.array(data['question']['points']).flatten()
         prediction = model.predict([question_points])[0]
-        
-        return jsonify({'prediction': prediction})
+
+        # Prepare response
+        response_data = {'prediction': prediction}
+
+        # Log truncated response (for debugging)
+        print(f"Response: {json.dumps(response_data)}")
+
+        return jsonify(response_data)
+
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Make the app remotely accessible
+    app.run(debug=True, host='0.0.0.0', port=5000)
